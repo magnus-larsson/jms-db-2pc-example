@@ -1,3 +1,22 @@
 spring:
   application:
     name: jms-db-example
+  activemq:
+    broker-url: tcp://localhost:61616
+  jms:
+    listener:
+      acknowledge-mode: client
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        transaction:
+          jta:
+            platform: org.hibernate.engine.transaction.jta.platform.internal.AtomikosJtaPlatform

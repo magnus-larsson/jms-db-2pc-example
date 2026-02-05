@@ -19,8 +19,24 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-activemq'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'com.atomikos:transactions-hibernate4:6.0.0:jakarta'
+	implementation 'com.atomikos:transactions-jdbc:6.0.0:jakarta'
+	implementation 'com.atomikos:transactions-jms:6.0.0:jakarta'
+	implementation 'com.atomikos:transactions-api:6.0.0'
+	implementation 'com.atomikos:transactions:6.0.0'
+	implementation 'com.atomikos:transactions-jta:6.0.0:jakarta'
+	implementation 'jakarta.transaction:jakarta.transaction-api'
+	implementation 'org.postgresql:postgresql'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:postgresql'
+	testImplementation 'org.testcontainers:activemq'
+	testImplementation 'org.awaitility:awaitility'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
