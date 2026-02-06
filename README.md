@@ -1,5 +1,7 @@
 # Receive message and store it in a database using 2 PC transactions
 
+The source code in this project has been created using JetBrain's AI assistent Junie.
+
 ## AI prompt
 
 Enhance the Spring Boot application to consume messages via JMS using Apache ActiveMQ and store processed records together with the JMS MessageId in a PostgreSQL database using Spring Data JPA. The MessageId shall be used as the Primary Key in the table. For transaction handling, it shall apply the 2 PC protocol. I also need some integration tests using Testcontainers to verify that it works as expected. The tests should also cover negative tests that verify that a message is not consumed if the database update fails, the message should instead be placed on a DLQ after three failed attempts. The integration test for the negative test should verify that the message arrived in the DLQ. All integration tests shall verify that there is no message left on the in-queue after the processing is done, i.e. that they are consumed. I shall be possible to run all tests together in IntelliJ IDEA.
