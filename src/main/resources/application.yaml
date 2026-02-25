@@ -20,3 +20,5 @@ spring:
         transaction:
           jta:
             platform: org.hibernate.engine.transaction.jta.platform.internal.AtomikosJtaPlatform
+
+logging.level.org.springframework.transaction: TRACE
