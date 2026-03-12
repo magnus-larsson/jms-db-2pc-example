@@ -29,10 +29,10 @@ public class MessageConsumer {
 
     @JmsListener(destination = "inbound.queue")
     @Transactional
-    @Retryable(include = RuntimeException.class, maxAttempts = 3)
+    @Retryable(include = RuntimeException.class, maxAttempts = 4)
     public void receiveMessage(Message message) throws JMSException {
         String messageId = message.getJMSMessageID();
-        LOG.info("Received message with ID: {}", messageId);
+        LOG.info("### Received message with ID: {}", messageId);
 
         if (message instanceof TextMessage textMessage) {
             String content = textMessage.getText();
