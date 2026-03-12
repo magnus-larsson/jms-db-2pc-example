@@ -1,8 +1,6 @@
 spring:
   application:
     name: jms-db-example
-  activemq:
-    broker-url: tcp://localhost:61616
   jms:
     listener:
       acknowledge-mode: client
@@ -20,5 +18,13 @@ spring:
         transaction:
           jta:
             platform: org.hibernate.engine.transaction.jta.platform.internal.AtomikosJtaPlatform
+
+ibm:
+  mq:
+    queue-manager: QM1
+    channel: DEV.APP.SVRCONN
+    conn-name: localhost(1414)
+    user: app
+    password: passw0rd
 
 logging.level.org.springframework.transaction: TRACE

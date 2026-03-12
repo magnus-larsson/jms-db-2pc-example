@@ -4,13 +4,14 @@ import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.atomikos.jms.AtomikosConnectionFactoryBean;
+import com.ibm.mq.jakarta.jms.MQXAConnectionFactory;
+import com.ibm.mq.jakarta.jms.MQConnectionFactory;
+import com.ibm.msg.client.jakarta.wmq.common.CommonConstants;
+import jakarta.jms.XAConnectionFactory;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.UserTransaction;
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.ActiveMQXAConnectionFactory;
-import org.postgresql.xa.PGXADataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +22,23 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@EnableConfigurationProperties({DataSourceProperties.class, ActiveMQProperties.class})
+@EnableConfigurationProperties({DataSourceProperties.class})
 public class TransactionConfig {
+
+    @Value("${ibm.mq.queue-manager}")
+    private String queueManager;
+
+    @Value("${ibm.mq.channel}")
+    private String channel;
+
+    @Value("${ibm.mq.conn-name}")
+    private String connName;
+
+    @Value("${ibm.mq.user}")
+    private String mqUser;
+
+    @Value("${ibm.mq.password}")
+    private String mqPassword;
 
     @Bean(initMethod = "init", destroyMethod = "close")
     public UserTransactionManager userTransactionManager() throws Exception {
@@ -59,34 +75,40 @@ public class TransactionConfig {
     }
 
     @Bean
-    public AtomikosConnectionFactoryBean connectionFactory(ActiveMQProperties properties) {
-        ActiveMQXAConnectionFactory xaConnectionFactory = new ActiveMQXAConnectionFactory();
-        xaConnectionFactory.setBrokerURL(properties.getBrokerUrl());
-        if (properties.getUser() != null) xaConnectionFactory.setUserName(properties.getUser());
-        if (properties.getPassword() != null) xaConnectionFactory.setPassword(properties.getPassword());
-        // Configure broker-side redelivery max to 2 retries (total 3 deliveries)
-        org.apache.activemq.RedeliveryPolicy rp = new org.apache.activemq.RedeliveryPolicy();
-        rp.setMaximumRedeliveries(2);
-        rp.setInitialRedeliveryDelay(100);
-        xaConnectionFactory.setRedeliveryPolicy(rp);
+    public AtomikosConnectionFactoryBean connectionFactory() throws Exception {
+        MQXAConnectionFactory mqXAConnectionFactory = new MQXAConnectionFactory();
+        mqXAConnectionFactory.setHostName(connName.split("\\(")[0]);
+        mqXAConnectionFactory.setPort(Integer.parseInt(connName.split("\\(")[1].replace(")", "")));
+        mqXAConnectionFactory.setQueueManager(queueManager);
+        mqXAConnectionFactory.setChannel(channel);
+        mqXAConnectionFactory.setTransportType(CommonConstants.WMQ_CM_CLIENT);
+
+        // Set the connection username - required for authentication with IBM MQ
+        mqXAConnectionFactory.setStringProperty(CommonConstants.USERID, mqUser);
+        mqXAConnectionFactory.setStringProperty(CommonConstants.PASSWORD, mqPassword);
 
         AtomikosConnectionFactoryBean bean = new AtomikosConnectionFactoryBean();
-        bean.setUniqueResourceName("amq-" + System.currentTimeMillis() % 1000000 + "-" + java.util.UUID.randomUUID().toString().substring(0, 8));
-        bean.setXaConnectionFactory(xaConnectionFactory);
+        bean.setUniqueResourceName("ibmmq-" + System.currentTimeMillis() % 1000000 + "-" + java.util.UUID.randomUUID().toString().substring(0, 8));
+        bean.setXaConnectionFactory(mqXAConnectionFactory);
         bean.setPoolSize(20);
         return bean;
     }
+
     @Bean(name = "nonXaConnectionFactory")
-    public ActiveMQConnectionFactory nonXaConnectionFactory(ActiveMQProperties properties) {
-        ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory();
-        cf.setBrokerURL(properties.getBrokerUrl());
-        if (properties.getUser() != null) cf.setUserName(properties.getUser());
-        if (properties.getPassword() != null) cf.setPassword(properties.getPassword());
+    public MQConnectionFactory nonXaConnectionFactory() throws Exception {
+        MQConnectionFactory cf = new MQConnectionFactory();
+        cf.setHostName(connName.split("\\(")[0]);
+        cf.setPort(Integer.parseInt(connName.split("\\(")[1].replace(")", "")));
+        cf.setQueueManager(queueManager);
+        cf.setChannel(channel);
+        cf.setTransportType(CommonConstants.WMQ_CM_CLIENT);
+        cf.setStringProperty(CommonConstants.USERID, mqUser);
+        cf.setStringProperty(CommonConstants.PASSWORD, mqPassword);
         return cf;
     }
 
     @Bean(name = "nonXaJmsTemplate")
-    public org.springframework.jms.core.JmsTemplate nonXaJmsTemplate(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") ActiveMQConnectionFactory nonXaConnectionFactory) {
+    public org.springframework.jms.core.JmsTemplate nonXaJmsTemplate(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") MQConnectionFactory nonXaConnectionFactory) {
         org.springframework.jms.core.JmsTemplate template = new org.springframework.jms.core.JmsTemplate(nonXaConnectionFactory);
         template.setReceiveTimeout(1000L);
         return template;

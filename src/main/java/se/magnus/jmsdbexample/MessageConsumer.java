@@ -61,7 +61,7 @@ public class MessageConsumer {
             String content = textMessage.getText();
             String messageId = message.getJMSMessageID();
             LOG.warn("Recovering after retries, sending to DLQ. Message ID: {}", messageId);
-            nonXaJmsTemplate.convertAndSend("ActiveMQ.DLQ", content);
+            nonXaJmsTemplate.convertAndSend("DEV.DEAD.LETTER.QUEUE", content);
         }
     }
 }

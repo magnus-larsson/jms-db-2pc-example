@@ -1,6 +1,5 @@
 package se.magnus.jmsdbexample;
 
-import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Message;
 import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.Test;
@@ -8,16 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.activemq.ActiveMQContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +48,7 @@ public class JmsDbIntegrationTest extends AbstractIntegrationTest {
 
         // Should try 3 times and then end up in DLQ
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-            Message dlqMessage = jmsTemplate.receive("ActiveMQ.DLQ");
+            Message dlqMessage = jmsTemplate.receive("DEV.DEAD.LETTER.QUEUE");
             assertThat(dlqMessage).isNotNull();
             assertThat(((TextMessage) dlqMessage).getText()).isEqualTo(content);
         });

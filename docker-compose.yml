@@ -17,23 +17,27 @@ services:
       timeout: 5s
       retries: 5
 
-  activemq:
-    image: apache/activemq-classic:latest
-    container_name: jms-db-activemq
+  ibmmq:
+    image: icr.io/ibm-messaging/mq:latest
+    platform: linux/amd64
+    container_name: jms-db-ibmmq
     ports:
-      - "61616:61616"  # OpenWire protocol (JMS)
-      - "8161:8161"    # Web Console
+      - "1414:1414"  # MQ listener port
+      - "9443:9443"  # MQ Web Console
     environment:
-      ACTIVEMQ_ADMIN_LOGIN: admin
-      ACTIVEMQ_ADMIN_PASSWORD: admin
+      LICENSE: accept
+      MQ_QMGR_NAME: QM1
+      MQ_APP_PASSWORD: passw0rd
+      MQ_ENABLE_EMBEDDED_WEB_SERVER: "true"
     volumes:
-      - activemq-data:/opt/apache-activemq/data
+      - ibmmq-data:/mnt/mqm
+      - ./mq-config/20-dev.mqsc:/etc/mqm/20-dev.mqsc:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8161"]
+      test: ["CMD", "dspmq"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres-data:
-  activemq-data:
+  ibmmq-data:
