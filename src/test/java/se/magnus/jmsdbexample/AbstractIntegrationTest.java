@@ -37,6 +37,14 @@ public abstract class AbstractIntegrationTest {
             "echo \"SET AUTHREC PROFILE('inbound.queue') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALL)\" | runmqsc QM1");
         ibmmq.execInContainer("bash", "-c",
             "echo \"SET AUTHREC PROFILE('DEV.DEAD.LETTER.QUEUE') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALL)\" | runmqsc QM1");
+        ibmmq.execInContainer("bash", "-c",
+            "echo \"DEFINE QLOCAL('request.queue') REPLACE\" | runmqsc QM1");
+        ibmmq.execInContainer("bash", "-c",
+            "echo \"DEFINE QLOCAL('reply.queue') REPLACE\" | runmqsc QM1");
+        ibmmq.execInContainer("bash", "-c",
+            "echo \"SET AUTHREC PROFILE('request.queue') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALL)\" | runmqsc QM1");
+        ibmmq.execInContainer("bash", "-c",
+            "echo \"SET AUTHREC PROFILE('reply.queue') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALL)\" | runmqsc QM1");
     }
 
     @DynamicPropertySource
