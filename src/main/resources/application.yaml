@@ -28,3 +28,10 @@ ibm:
     password: passw0rd
 
 logging.level.org.springframework.transaction: TRACE
+#logging.level.org.springframework.transaction.annotation.AnnotationTransactionAttributeSource=DEBUG
+#logging.level.com.atomikos: DEBUG
+
+## JMS/MQ Logging
+logging.level.org.springframework.jms: TRACE
+logging.level.org.springframework.messaging: TRACE
+logging.level.com.ibm.mq: TRACE
